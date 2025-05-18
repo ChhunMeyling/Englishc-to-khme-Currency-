@@ -1,170 +1,150 @@
-<?php
-// មុខងារបំលែងលេខទៅជាពាក្យភាសាអង់គ្លេស
-function numberToEnglishWords($num) {
-    $ones = array("", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine");
-    $teens = array("ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen");
-    $tens = array("", "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety");
-    
-    if ($num == 0) return "zero";
-    
-    $result = "";
-    
-    // រាប់លេខជាម៉ឺន
-    if ($num >= 100000) {
-        $result .= numberToEnglishWords(floor($num / 100000)) . " hundred ";
-        $num %= 100000;
-    }
-    
-    if ($num >= 1000) {
-        $result .= numberToEnglishWords(floor($num / 1000)) . " thousand ";
-        $num %= 1000;
-    }
-    
-    if ($num >= 100) {
-        $result .= $ones[floor($num / 100)] . " hundred ";
-        $num %= 100;
-    }
-    
-    if ($num >= 20) {
-        $result .= $tens[floor($num / 10)] . " ";
-        $num %= 10;
-    } elseif ($num >= 10) {
-        $result .= $teens[$num - 10] . " ";
-        $num = 0;
-    }
-    
-    if ($num > 0) {
-        $result .= $ones[$num] . " ";
-    }
-    
-    return trim($result) . " riel";
-}
-
-// មុខងារបំលែងលេខទៅជាពាក្យភាសាខ្មែរ
-function numberToKhmerWords($num) {
-    $khmer = array("", "មួយ", "ពីរ", "បី", "បួន", "ប្រាំ", "ប្រាំមួយ", "ប្រាំពីរ", "ប្រាំបី", "ប្រាំបួន");
-    $tens = array("", "ដប់", "ម្ភៃ", "សាមសិប", "សែសិប", "ហាសិប", "ហុកសិប", "ចិតសិប", "ប៉ែតសិប", "កៅសិប");
-    
-    if ($num == 0) return "សូន្យរៀល";
-    
-    $result = "";
-    
-    // រាប់លេខជាម៉ឺន
-    if ($num >= 10000) {
-        $result .= $khmer[floor($num / 10000)] . "ម៉ឺន";
-        $num %= 10000;
-    }
-    
-    if ($num >= 1000) {
-        $result .= $khmer[floor($num / 1000)] . "ពាន់";
-        $num %= 1000;
-    }
-    
-    if ($num >= 100) {
-        $result .= $khmer[floor($num / 100)] . "រយ";
-        $num %= 100;
-    }
-    
-    if ($num >= 10) {
-        $result .= $tens[floor($num / 10)];
-        $num %= 10;
-    }
-    
-    if ($num > 0) {
-        $result .= $khmer[$num];
-    }
-    
-    return $result . "រៀល";
-}
-
-// រក្សាទុកទិន្នន័យក្នុងឯកសារ
-function saveToFile($data) {
-    $file = 'transactions.txt';
-    file_put_contents($file, $data.PHP_EOL, FILE_APPEND);
-}
-
-// ដំណើរការទិន្នន័យ
-$error = '';
-$result = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $riel = $_POST['riel'] ?? '';
-    
-    if (!is_numeric($riel)) {
-        $error = 'សូមបញ្ចូលលេខដែលត្រឹមត្រូវ!';
-    } else {
-        $riel = (float)$riel;
-        $usd = number_format($riel / 4000, 2);
-        $english = numberToEnglishWords($riel);
-        $khmer = numberToKhmerWords($riel);
-        
-        // រក្សាទុកទិន្នន័យ
-        $log = date('Y-m-d H:i:s')." | Riel: $riel | USD: $usd";
-        saveToFile($log);
-        
-        $result = "
-        <div class='result'>
-            <p>a. $english</p>
-            <p>b. $khmer</p>
-            <p>c. USD: $usd</p>
-        </div>";
-    }
-}
-?>
-
 <!DOCTYPE html>
-<html lang="km">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>គណនារូបិយប័ណ្ណ</title>
+    <title>Currency Converter</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         body {
-            font-family: 'Khmer OS System', Arial, sans-serif;
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #f1f1f1;
+            font-family: Arial, sans-serif;
         }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        input[type="text"], button {
-            padding: 10px;
-            margin: 5px 0;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .error {
-            color: red;
-            margin: 10px 0;
-        }
-        .result {
-            margin-top: 20px;
+        header {
+            /* background-color: #007bff; */
+        
             padding: 15px;
-            background: #e8f5e9;
+            color: white;
+            text-align: center;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 10px;
+        }
+        button {
             border-radius: 5px;
+        }
+        .clear-btn {
+            background-color: #dc3545;
+            border: none;
+        }
+        .clear-btn:hover {
+            background-color: #c82333;
+        }
+        .message {
+            color: red;
+        }
+        table {
+            width: 100%;
+            background-color: white;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #1a8754;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>កម្មវិធីបម្លែងរូបិយប័ណ្ណ</h2>
-        <form method="POST">
-            <input type="text" name="riel" placeholder="សូមបញ្ចូលចំនួនរៀល..." required>
-            <button type="submit">គណនា</button>
-        </form>
-        
-        <?php if($error): ?>
-            <div class="error"><?= $error ?></div>
-        <?php endif; ?>
-        
-        <?php if($result): ?>
-            <h3>លទ្ធផល៖</h3>
-            <?= $result ?>
-        <?php endif; ?>
-    </div>
+    <header class="bg-success">
+        <h1>Currency Converter (Riel to Dollar)</h1>
+    </header>
+
+    <main class="container mt-5">
+        <div class="card p-4">
+            <form method="post" action="">
+                <div class="mb-3">
+                    <label for="riel" class="form-label">Enter Amount in Riels:</label>
+                    <input type="text" id="riel" name="riel" class="form-control" placeholder="e.g. 5000" value="<?php echo isset($_POST['riel']) ? htmlspecialchars($_POST['riel']) : ''; ?>">
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" name="convert" class="btn btn-success">Convert</button>
+                    <button type="button" class="btn clear-btn text-white" onclick="clearResult()">Clear</button>
+                    <button type="button" class="btn btn-dark text-white " onclick="viewHistory()">View History</button>
+                </div>
+                <div class="message mt-3">
+                    <?php
+                    if (isset($_POST['convert'])) {
+                        $input = trim($_POST['riel']);
+                        if (!is_numeric($input) || floatval($input) < 0.1) {
+                            echo "Please enter a valid number between 0.1 and 1 trillion.";
+                        } elseif (floatval($input) > 1000000000000) {
+                            echo "Cannot input more than 1 trillion.";
+                        }
+                    }
+                    ?>
+                </div>
+            </form>
+
+            <?php
+            if (isset($_POST['convert'])) {
+                $input = trim($_POST['riel']);
+                if (is_numeric($input) && floatval($input) >= 0.1 && floatval($input) <= 1000000000000) {
+                    $riel = floatval($input);
+                    $exchangeRate = 4000;
+
+                    function numberToWordsEN($number) {
+                        $f = new NumberFormatter("en", NumberFormatter::SPELLOUT);
+                        return ucfirst($f->format($number));
+                    }
+
+                    function numberToWordsKH($number) {
+                        $f = new NumberFormatter("km", NumberFormatter::SPELLOUT);
+                        return ucfirst($f->format($number));
+                    }
+
+                    $textEnglish = numberToWordsEN($riel) . ' riel';
+                    $textKhmer = numberToWordsKH($riel) . ' រៀល';
+                    $dollar = $riel / $exchangeRate;
+                    $textDollar = number_format($dollar, 2) . '$';
+
+                    echo '<div class="alert alert-success mt-4" id="result">';
+                    echo '<p>a. ' . $textEnglish . '</p>';
+                    echo '<p>b. ' . $textKhmer . '</p>';
+                    echo '<p>c. ' . $textDollar . '</p>';
+                    echo '</div>';
+
+                    $file = 'data.txt';
+                    $history = "$textEnglish | $textKhmer | $riel\n";
+                    file_put_contents($file, $history, FILE_APPEND);
+                }
+            }
+            ?>
+        </div>
+    </main>
+
+    <script>
+        function clearResult() {
+            document.getElementById('riel').value = '';
+            const resultDiv = document.getElementById('result');
+            if (resultDiv) {
+                resultDiv.innerHTML = '';
+            }
+        }
+
+        function viewHistory() {
+            fetch('data.txt')
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split('\n').filter(line => line);
+                    let table = '<table><tr><th>In English</th><th>In Khmer</th><th>Number</th></tr>';
+                    rows.forEach(row => {
+                        const cols = row.split(' | ');
+                        table += `<tr><td>${cols[0]}</td><td>${cols[1]}</td><td>${cols[2]}</td></tr>`;
+                    });
+                    table += '</table>';
+                    document.getElementById('result').innerHTML = table;
+                })
+                .catch(error => {
+                    alert('Failed to load history.');
+                });
+        }
+    </script>
 </body>
 </html>
